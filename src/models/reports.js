@@ -64,6 +64,10 @@ const ReportSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  ci: {
+    type: Number,
+    required: true,
+  },
   image: {
     type: String
   },

@@ -1,4 +1,4 @@
-import { getAllRespuestaRController } from "../controllers/respuestaR_controller.js"
+/*import { getAllRespuestaRController } from "../controllers/respuestaR_controller.js"
 
 const respuestaRModel = {
     async getAllRespuestaRModel (){
@@ -45,4 +45,31 @@ const respuestaRModel = {
     }
 }
 
-export default respuestaRModel
+export default respuestaRModel*/
+
+import mongoose from "mongoose";
+
+const Res_reportSchema = new mongoose.Schema({
+    direction: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    ci: {
+        type: Number,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+    },
+    date: {
+        type: Date,
+        default: Date.now(),
+    },
+});
+
+export default mongoose.model('Report_r',Res_reportSchema);
