@@ -41,6 +41,7 @@ export {
 // controllers/userController.js
 import bcrypt from 'bcrypt';
 import User from '../models/user.js';
+import { createToken } from '../middlewares/auth.js';
 
 const registerUserController = async (req, res) => {
   const { email, password } = req.body;
@@ -75,7 +76,11 @@ const loginUserController = async (req, res) => {
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (passwordMatch) {
-      res.json({ success: "Login exitoso", user });
+      const token = createToken({
+        id: user._id,
+        email: user.email,
+      })
+      res.json({ success: "Login exitoso", user, token });
     } else {
       res.status(400).json({ error: "Username o password invalido" });
     }

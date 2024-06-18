@@ -6,10 +6,9 @@ const router = Router()
 
 
 router.get('/reports', getAllReportsController)
-router.post('/reports', createReportsController)
+router.post('/reports',verifyToken, createReportsController)
 router.get('/reports/:id', getReportByIdController)
-router.put('/reports/:id', updateReportController)
-//router.delete('/reports/:id',verifyToken,deleteReportController)
-router.delete('/reports/:id',deleteReportController)
+router.put('/reports/:id', verifyToken, updateReportController)
+router.delete('/reports/:id',verifyToken,deleteReportController)
 
 export default router
