@@ -2,7 +2,7 @@
 import {v4 as uuidv4} from "uuid"*/
 
 import Report from '../models/reports.js'
-import cloudinary from '../server.js'
+import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs-extra';
 
 /*const getAllReportsController = async (req, res) => {
@@ -46,7 +46,7 @@ const getAllReportsController = async (req, res) => {
     }
 }*/
 
-/*const createReportsController = async (req, res) => {
+const createReportsController = async (req, res) => {
     const { direction, description } = req.body;
   
     // Validación básica de los datos de entrada
@@ -56,67 +56,30 @@ const getAllReportsController = async (req, res) => {
   
     try {
       // Crear un nuevo reporte
-      const newReport = new Report({
+      const newReportData = new Report({
         direction,
         description,
-        image
+        date: new Date(),
       });
-    
+
       const cloudinaryResponse = await cloudinary.uploader.upload(req.files.image.tempFilePath,{folder:'Reports'});
       newReportData.image = cloudinaryResponse.secure_url;
-      newReportData.public_id=cloudinaryReponse.public_id
+      newReportData.public_id = cloudinaryResponse.public_id
+      console.log("hoals")
       // Guardar el reporte en la base de datos
       //const savedReport = await newReport.save();
       const report = new Report(newReportData)
       await report.save()
 
       await fs.unlink(req.files.image.tempFilePath)
+      console.log("hola")
       // Enviar una respuesta exitosa
-      res.status(201).json(savedReport);
+      res.status(201).json(report);
     } catch (error) {
       // Manejo de errores (por ejemplo, duplicado de 'direction')
       res.status(500).json({ message: 'Error creating report', error });
     }
-  };*/
-
-  const createReportsController = async (req, res) => {
-    const { direction, description } = req.body;
-  
-    // Verifica que direction y description estén presentes en req.body
-    if (!direction || !description) {
-      return res.status(400).json({ error: 'La dirección y la descripción son obligatorias' });
-    }
-  
-    const newReportData = {
-      direction,
-      description,
-      date: new Date()
-    };
-  
-    try {
-      if (req.file) {
-        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'report_images'
-        });
-  
-        newReportData.image = cloudinaryResponse.secure_url;
-      }
-  
-      const report = new Report(newReportData);
-      await report.save();
-  
-      if (req.file) {
-        // Elimina el archivo temporal local después de subirlo a Cloudinary
-        fs.unlinkSync(req.file.path);
-      }
-  
-      res.status(201).json(report);
-    } catch (error) {
-      console.error('Error al crear el reporte:', error);
-      res.status(500).json({ error: 'Error al crear el reporte' });
-    }
   };
-  
   
 
 /*const getReportByIdController = async(req,res) => {
@@ -161,7 +124,7 @@ const getReportByIdController = async (req, res) => {
     }
 }*/
 
-const updateReportController = async (req, res) => {
+/*const updateReportController = async (req, res) => {
     const { id } = req.params;
     const { direction, case: caseDescription, date } = req.body;
   
@@ -187,8 +150,36 @@ const updateReportController = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Error updating report', error });
     }
-  };
+  };*/
 
+  const updateReportController = async (req, res) => {
+    const { direction, description } = req.body;
+    const { id } = req.params;
+
+    const updatedReport = {
+        direction,
+        description,
+    };
+
+    try {
+        if (req.files && req.files.image) {
+            const cloudinaryResponse = await cloudinary.uploader.upload(req.files.image.tempFilePath, { folder: 'Reports' });
+            updatedReport.image = cloudinaryResponse.secure_url;
+            await fs.unlink(req.files.image.tempFilePath);
+        }
+
+        const report = await Report.findByIdAndUpdate(id, updatedReport, { new: true });
+
+        if (!report) {
+            return res.status(404).json({ error: 'Report no encontrado' });
+        }
+
+        res.status(200).json(report);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar el reporte' });
+    }
+};
 /*const deleteReportController = async (req, res)=>{
     const {id}= req.params
     try {
@@ -200,7 +191,7 @@ const updateReportController = async (req, res) => {
     }
 }*/
 
-const deleteReportController = async (req, res) => {
+/*const deleteReportController = async (req, res) => {
     const { id } = req.params;
   
     try {
@@ -218,7 +209,37 @@ const deleteReportController = async (req, res) => {
       // Manejo de errores
       res.status(500).json({ message: 'Error deleting report', error });
     }
-  };
+  };*/
+
+  const deleteReportController = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Buscar el reclamo por el ID para obtener el public_id
+        const report = await Report.findById(id);
+
+        if (!report) {
+            return res.status(404).json({ error: 'Reporte no encontrado' });
+        }
+
+        // Verificar si existe public_id en el reclamo
+        if (!report.public_id) {
+            return res.status(400).json({ error: 'Missing required parameter - public_id' });
+        }
+
+        // Eliminar la imagen de Cloudinary utilizando el public_id
+        await cloudinary.uploader.destroy(report.public_id);
+
+        // Eliminar el reclamo de la base de datos
+        await Report.findByIdAndDelete(id);
+
+        res.json({ message: 'Reporte eliminado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al eliminar el reclamo' });
+    }
+};
+
 
 export{
     getAllReportsController, 

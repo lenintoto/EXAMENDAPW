@@ -7,6 +7,11 @@ import router from './routers/report_routes.js';
 import routerR from './routers/respuesta_routes.js'
 import routerU from './routers/user_routes.js'
 import { v2 as cloudinary } from 'cloudinary';
+import fileUpload from 'express-fileupload'
+
+// Inicializaciones
+const app = express()
+dotenv.config()
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,12 +19,10 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-
-
-// Inicializaciones
-const app = express()
-dotenv.config()
-
+app.use( fileUpload ( { 
+    useTempFiles : true , 
+    tempFileDir : './uploads' 
+})) ;
 // Configuraciones 
 app.use(cors())
 
