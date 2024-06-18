@@ -1,4 +1,4 @@
-const reportModel = {
+/*const reportModel = {
 
     async getAllReportsModel() {
         const peticion = await fetch ('http://localhost:4000/reports')
@@ -51,4 +51,26 @@ const reportModel = {
 
 }
 
-export default reportModel
+export default reportModel*/
+
+import mongoose from 'mongoose';
+
+const ReportSchema = new mongoose.Schema({
+  direction: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+export default mongoose.model('Report', ReportSchema);

@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from 'uuid'
+/*import {v4 as uuidv4} from 'uuid'
 
 import userModel from "../models/user.js"
 import bcrypt from "bcrypt"
@@ -32,6 +32,58 @@ const loginUserController= async (req,res)=>{
         res.status(500).json({msg:error})
     }
 }
+
+export {
+    registerUserController,
+    loginUserController
+}*/
+
+// controllers/userController.js
+import bcrypt from 'bcrypt';
+import User from '../models/user.js';
+
+const registerUserController = async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ error: "Email ya existe" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user = new User({ email, password: hashedPassword });
+    await user.save();
+
+    res.json({ success: "Usuario registrado con éxito", user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Error en el registro del email" });
+  }
+};
+
+const loginUserController = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Username o password invalido" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (passwordMatch) {
+      res.json({ success: "Login exitoso", user });
+    } else {
+      res.status(400).json({ error: "Username o password invalido" });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Error en el login" });
+  }
+};
 
 export {
     registerUserController,
