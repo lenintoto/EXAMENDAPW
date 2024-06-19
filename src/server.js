@@ -1,46 +1,49 @@
-// Requerir los módulos
-import express from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import swaggerUi from "swagger-ui-express"; // Importar swaggerUi
+import { swaggerSpec } from "../docs/swagger.js"; // Importar swaggerSpec desde swagger.js
 
-import router from './routers/report_routes.js';
-import routerR from './routers/respuesta_routes.js'
-import routerU from './routers/user_routes.js'
-import { v2 as cloudinary } from 'cloudinary';
-import fileUpload from 'express-fileupload'
+import router from "./routers/report_routes.js";
+import routerR from "./routers/respuesta_routes.js";
+import routerU from "./routers/user_routes.js";
 
-// Inicializaciones
-const app = express()
-dotenv.config()
+import { v2 as cloudinary } from "cloudinary";
+import fileUpload from "express-fileupload";
+
+const app = express();
+dotenv.config();
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-})
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-app.use( fileUpload ( { 
-    useTempFiles : true , 
-    tempFileDir : './uploads' 
-})) ;
-// Configuraciones 
-app.use(cors())
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "./uploads",
+  })
+);
 
-// Middlewares 
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
+app.set("port", process.env.PORT || 3000);
 
-// Variables globales
-app.set('port',process.env.port || 3000)
+app.use("/api", router);
+app.use("/api", routerR);
+app.use("/api", routerU);
 
+// Configuración de Swagger
+app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/v1/docs.json", (req, res) => {
+  res.setHeader("Content-type", "application/json");
+  res.send(swaggerSpec);
+});
 
-// Rutas 
-app.use('/api',router)
-app.use('/api',routerR)
-app.use('/api',routerU)
 // Manejo de una ruta que no sea encontrada
-app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
+app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"));
 
-
-// Exportar la instancia de express por medio de app
-export default  app
+export default app;

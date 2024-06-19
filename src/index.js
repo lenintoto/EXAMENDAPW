@@ -1,14 +1,12 @@
-// Importar app
-import app from './server.js'
+import app from "./server.js";
+import { V1SwaggerDocs } from "../docs/swagger.js";
+import connection from "./database.js";
 
-import connection from './database.js';
+connection();
 
-
-connection()
-
-// Utilizar el método listen
-app.listen(app.get('port'),()=>{
-    console.log(`Server ok on http://localhost:${app.get('port')}`);
-})
-
-
+app.listen(app.get("port"), () => {
+  V1SwaggerDocs(app, app.get("port"));
+  console.log(
+    `Servidor funcionando en http://localhost:${app.get("port")}/api/v1/docs/`
+  );
+});
