@@ -7,6 +7,6 @@ connection();
 app.listen(app.get("port"), () => {
   V1SwaggerDocs(app, app.get("port"));
   console.log(
-    `Servidor funcionando en http://localhost:${app.get("port")}/api/v1/docs/`
+    `Servidor funcionando en http://localhost:${app.get("port")}/`
   );
 });

@@ -37,7 +37,7 @@ app.use("/api", routerR);
 app.use("/api", routerU);
 
 // Configuración de Swagger
-app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/docs.json", (req, res) => {
   res.setHeader("Content-type", "application/json");
   res.send(swaggerSpec);
