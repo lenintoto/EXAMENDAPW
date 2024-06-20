@@ -16,7 +16,7 @@ const options = {
       },
     ],
     paths: {
-      "/reports": {
+      "/api/reports": {
         get: {
           summary: "Obtener todos los reportes",
           responses: {
